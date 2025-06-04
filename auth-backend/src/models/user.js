@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 
+// 사용자 스키마와 데이터베이스 상호작용을 정의합니다.
 const userSchema = new mongoose.Schema({
     username: {
         type: String,

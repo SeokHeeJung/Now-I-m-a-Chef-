@@ -1,3 +1,4 @@
+// 사용자 회원가입 및 로그인 관련 함수들을 정의합니다.
 class AuthController {
     constructor(userModel) {
         this.userModel = userModel;
