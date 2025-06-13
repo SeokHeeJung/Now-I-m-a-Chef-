@@ -1,0 +1,320 @@
+/*  모든 요소 기본 스타일 초기화 */
+* {
+    margin: 0;                     /* 바깥 여백 제거 */
+    padding: 0;                    /* 안쪽 여백 제거 */
+    box-sizing: border-box;        /* 요소의 width/height에 padding, border 포함 */
+}
+
+/*  전체 페이지 스타일 */
+body {
+    overflow-x: hidden;
+    position: relative; /* 사이드 패널의 z-index가 확실히 동작하도록 */
+    font-family: 'Segoe UI', sans-serif;  /* 전체 글꼴 지정 (폰트 우선순위 설정) */
+    line-height: 1.6;                     /* 줄간격 설정 (글 가독성 높임) */
+    background-color: #f5f7fa;            /* 전체 배경색 */
+    color: #333;                          /* 기본 글자색 (짙은 회색) */
+}
+
+/* 중앙 정렬을 위한 공통 컨테이너 클래스 */
+.container {
+    width: 100%;                           /* 전체 너비의 90%로 제한 */
+    margin: 0;                         /* 좌우 중앙 정렬 */
+    padding: 0 30px;        /* 여백이 너무 붙지 않게 살짝 padding */
+}
+
+/*  상단 헤더 스타일 */
+header {
+    background-color: gray;
+    color: white;                         /* 글자색 흰색 */
+    padding: 20px 0;                      /* 위아래 여백 20px, 좌우는 없음 */
+    margin-bottom: 30px;                  /* 아래쪽 여백 */
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);/* 그림자 효과 */
+}
+
+header h1 {
+    font-size: 2rem;                      /* 글자 크기 (rem = root em, 기본 폰트의 2배) */
+    margin-bottom: 10px;                  /* 제목 아래 여백 */
+}
+
+
+/* 네비게이션 링크 스타일 */
+header nav a {
+    color: white;                         /* 글자색 흰색 */
+    margin-right: 20px;                   /* 오른쪽 간격 */
+    text-decoration: none;                /* 밑줄 제거 */
+    font-weight: bold;                    /* 굵은 글씨 */
+}
+
+header nav a:hover {
+    text-decoration: underline;           /* 마우스 올리면 밑줄 생김 */
+}
+/* header 안의 container에 flex 정렬 적용 */
+header .container {
+    display: flex;              /* 수평 정렬 시작 */
+    justify-content: space-between; /* 좌우 끝으로 분산 */
+    align-items: center;        /* 수직 정렬 (중앙) */
+}
+
+/* 본문 콘텐츠 스타일 */
+main section {
+    background: white;                    /* 배경을 흰색으로 설정 */
+    padding: 30px;                        /* 안쪽 여백 */
+    border-radius: 8px;                   /* 모서리를 둥글게 (8px) */
+    box-shadow: 0 0 8px rgba(0, 0, 0, 0.05); /* 흐릿한 외곽 그림자 */
+}
+
+/* 검색창 섹션을 화면 가운데 정렬 */
+.search-section {
+    display: flex;
+    justify-content: center;      /* 수평 가운데 */
+    align-items: center;          /* 수직 가운데 */
+    height: 60vh;                 /* 화면의 60% 높이만큼 공간 */
+}
+
+.hero {
+    background-image: url('img/food-bg.jpg'); /* 또는 웹 URL 사용 가능 */
+    background-size: cover;           /* 이미지 비율 유지하며 화면 가득 채움 */
+    background-position: center;      /* 중앙 정렬 */
+    height: 100vh;                    /* 화면 높이 전체 사용 */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* 🔍 검색창을 어둡게 깔아줌 (배경 대비) */
+.search-overlay {
+    background-color: rgba(255, 255, 255, 0.85); /* 살짝 반투명 흰 배경 */
+    padding: 30px 40px;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+}
+
+/* 기존 검색박스 스타일 그대로 유지 */
+.search-box {
+    display: flex;
+    gap: 10px;
+}
+
+.search-box input {
+    padding: 10px 15px;
+    font-size: 1rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    width: 250px;
+}
+
+.search-box button {
+    padding: 10px 15px;
+    background-color: gray;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.side-panel {
+    position: fixed;
+    top: 0;
+    right: -300px;
+    width: 300px;
+    height: 100%;
+    background-color: white;
+    box-shadow: -2px 0 8px rgba(0, 0, 0, 0.2);
+    padding: 20px;
+    transition: right 0.4s ease-in-out;
+    z-index: 1000;
+}
+
+.side-panel.open {
+    right: 0;
+}
+
+#close-panel {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    font-size: 24px;
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+
+.recipe-page {
+    padding: 40px;
+    background-color: #f9fafb;
+}
+
+.recipe-search {
+    background: none;
+    padding: 30px 0;
+    text-align: center;
+}
+
+/* 검색창 전체 정렬 */
+#search-form {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+}
+
+/* 검색 input */
+#recipe-search-input {
+    padding: 10px 15px;
+    font-size: 1rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    width: 250px;
+}
+
+/* 검색 버튼 */
+#search-form button {
+    padding: 10px 15px;
+    background-color: gray;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.recipe-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 20px;
+    padding: 20px;
+}
+
+.recipe-card {
+    background: #fff;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    transition: transform 0.2s ease;
+}
+
+.recipe-card img {
+    width: 100%;
+    height: 140px;
+    object-fit: cover;
+    border-bottom: 1px solid #eee;
+}
+
+.recipe-card h3 {
+    font-size: 16px;
+    padding: 12px;
+    margin: 0;
+    text-align: center;
+}
+
+/* 카드 컨테이너 */
+.recipe-card {
+    width: 200px;
+    height: 260px;
+    perspective: 1000px;
+}
+
+/* 앞면 */
+.card-front {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.card-front img {
+    width: 100%;
+    height: 140px;
+    object-fit: cover;
+}
+
+.card-front h3 {
+    margin: 10px 0;
+    font-size: 16px;
+}
+
+/* 뒷면 */
+.card-back {
+    display: none;
+}
+.modal {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    background: #fff;
+    padding: 30px;
+    border-radius: 12px;
+    width: 500px;
+    max-width: 90%;
+    position: relative;
+}
+
+.modal-content img {
+    width: 70%;
+    border-radius: 10px;
+    margin-bottom: 16px;
+}
+
+.close-button {
+    position: absolute;
+    top: 16px;
+    right: 20px;
+    font-size: 28px;
+    font-weight: bold;
+    color: #333;
+    cursor: pointer;
+}
+
+.rating {
+    margin-top: 10px;
+}
+.rating button {
+    margin-right: 8px;
+}
+
+#comments-section {
+    margin-top: 20px;
+}
+#comments-section ul {
+    list-style: none;
+    padding: 0;
+    max-height: 150px;
+    overflow-y: auto;
+}
+#comments-section li {
+    margin-bottom: 6px;
+}
+
+.hidden {
+    display: none;
+}
+
+.ingredient-list {
+    list-style: none;
+    padding: 0;
+}
+
+.ingredient-list li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 4px;
+}
+
+.ingredient-list li small {
+    margin-left: 4px;
+    color: #666;
+}
+
+.ingredient-list li button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: red;
+}

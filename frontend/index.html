@@ -1,0 +1,65 @@
+
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Now, I'm a Chef!</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="/favicon.ico">
+</head>
+<body>
+<header>
+    <div class="container">
+        <h1>Now, I'm a Chef! 🧑‍🍳</h1>
+        <nav>
+            <a href="#" data-panel="home">홈</a>
+            <a href="#" data-panel="recipe">레시피</a>
+            <a href="#" data-panel="storage">재료</a>
+            <span id="auth-section">
+                <a href="#" data-panel="login">로그인</a>
+            </span>
+        </nav>
+    </div>
+</header>
+<main id= "main-content" class="hero">
+    <div class="search-overlay">
+        <form class="search-box">
+            <input type="text" placeholder="음식을 검색하세요">
+            <button type="submit">검색</button>
+        </form>
+    </div>
+</main>
+
+<footer>
+    <p>© 2025 Seokhee. All rights reserved.</p>
+</footer>
+<aside id="side-panel" class="side-panel">
+    <button id="close-panel">×</button>
+    <div id="panel-content"></div>
+</aside>
+<script type="module" src="script.js"></script>
+<!-- body 맨 아래에 추가 -->
+<div id="recipe-modal" class="modal hidden">
+    <div class="modal-content">
+        <span id="close-modal" class="close-button">&times;</span>
+        <img id="modal-image" src="" alt="레시피 이미지" />
+        <h2 id="modal-title"></h2>
+        <p id="modal-description"></p>
+        <p><strong>재료:</strong> <span id="modal-ingredients"></span></p>
+        <div class="rating">
+            <button id="like-btn">👍 <span id="like-count">0</span></button>
+            <button id="dislike-btn">👎 <span id="dislike-count">0</span></button>
+        </div>
+        <div id="comments-section">
+            <h3>댓글</h3>
+            <ul id="comment-list"></ul>
+            <form id="comment-form" data-id="">
+                <input type="text" id="comment-input" placeholder="댓글을 작성하세요" required />
+                <button type="submit">등록</button>
+            </form>
+        </div>
+    </div>
+</div>
+</body>
+</html>
