@@ -1,5 +1,6 @@
 const express = require("express");
 const router = express.Router();
+const mongoose = require("mongoose");
 const Recipe = require("../models/Recipe");
 const { broadcast } = require("../websocket");
 // 모든 레시피 조회
@@ -16,11 +17,13 @@ router.get("/", async (req, res) => {
 router.post("/:id/like", async (req, res) => {
     const { userId } = req.body;
     if (!userId) return res.status(400).json({ message: "userId 필요" });
-
     try {
-        const { userId } = req.body;
-        if (!userId) return res.status(400).json({ message: "userId 필요" });
+        if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+            return res.status(400).json({ message: "잘못된 레시피 ID" });
+        }
+        const recipe = await Recipe.findById(req.params.id);
         if (!recipe) return res.status(404).json({ message: "레시피 없음" });
+        recipe.votes = recipe.votes || [];
         const existing = recipe.votes.find(v => v.userId === userId);
         if (existing && existing.value === 1) {
             return res.json({ likes: recipe.likes, dislikes: recipe.dislikes });
@@ -46,8 +49,12 @@ router.post("/:id/dislike", async (req, res) => {
     const { userId } = req.body;
     if (!userId) return res.status(400).json({ message: "userId 필요" });
     try {
+        if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+            return res.status(400).json({ message: "잘못된 레시피 ID" });
+        }
         const recipe = await Recipe.findById(req.params.id);
         if (!recipe) return res.status(404).json({ message: "레시피 없음" });
+        recipe.votes = recipe.votes || [];
         const existing = recipe.votes.find(v => v.userId === userId);
         if (existing && existing.value === -1) {
             return res.json({ likes: recipe.likes, dislikes: recipe.dislikes });
@@ -71,6 +78,9 @@ router.post("/:id/dislike", async (req, res) => {
 // 댓글 조회
 router.get("/:id/comments", async (req, res) => {
     try {
+        if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+            return res.status(400).json({ comments: [] });
+        }
         const recipe = await Recipe.findById(req.params.id);
         if (!recipe) return res.status(404).json({ comments: [] });
         res.json({ comments: recipe.comments });
@@ -84,8 +94,12 @@ router.post("/:id/comments", async (req, res) => {
     const { user, text } = req.body;
     if (!text) return res.status(400).json({ message: "내용 필요" });
     try {
+        if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+            return res.status(400).json({ comments: [] });
+        }
         const recipe = await Recipe.findById(req.params.id);
         if (!recipe) return res.status(404).json({ message: "레시피 없음" });
+        recipe.comments = recipe.comments || [];
         recipe.comments.push({ user, text });
         await recipe.save();
         broadcast({ type: 'comment', recipeId: recipe.id, comments: recipe.comments });

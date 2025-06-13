@@ -5,14 +5,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="115623e2-0358-416e-8cf3-fcfdd300250f" name="변경" comment="">
-      <change afterPath="$PROJECT_DIR$/backend/websocket.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/frontend/vite.config.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/backend/models/Recipe.js" beforeDir="false" afterPath="$PROJECT_DIR$/backend/models/Recipe.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/backend/routes/recipes.js" beforeDir="false" afterPath="$PROJECT_DIR$/backend/routes/recipes.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/server.js" beforeDir="false" afterPath="$PROJECT_DIR$/backend/server.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/node_modules/.vite/deps/_metadata.json" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/node_modules/.vite/deps/_metadata.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/frontend/script.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/script.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/style.css" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/style.css" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -74,7 +70,7 @@
       <updated>1749791701874</updated>
       <workItem from="1749791703000" duration="1525000" />
       <workItem from="1749817683132" duration="618000" />
-      <workItem from="1749820139265" duration="1032000" />
+      <workItem from="1749820139265" duration="5083000" />
     </task>
     <servers />
   </component>

@@ -8,15 +8,21 @@ const recipeSchema = new mongoose.Schema({
     ingredients: [String], // 선택적 설명
     likes: { type: Number, default: 0 },
     dislikes: { type: Number, default: 0 },
-    votes: [{
-        userId: String,
-        value: { type: Number, enum: [1, -1] }
-    }],
-    comments: [{
-        user: String,
-        text: String,
-        createdAt: { type: Date, default: Date.now }
-    }]
+    votes: {
+        type: [{
+            userId: String,
+            value: { type: Number, enum: [1, -1] }
+        }],
+        default: []
+    },
+    comments: {
+        type: [{
+            user: String,
+            text: String,
+            createdAt: { type: Date, default: Date.now }
+        }],
+        default: []
+    }
 }, { timestamps: true });
 
 module.exports = mongoose.model("Recipe", recipeSchema);

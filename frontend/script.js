@@ -145,7 +145,7 @@ document.addEventListener("DOMContentLoaded", function () {
         if (e.target.id === 'like-btn') {
             const id = document.getElementById('comment-form').dataset.id;
             const user = JSON.parse(localStorage.getItem('user'));
-            fetch(`${API_BASE}/api/recipes/${id}/like`, {
+            fetch(`${API_BASE}/recipes/${id}/like`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ userId: user ? user.id : 'guest' })
@@ -160,7 +160,7 @@ document.addEventListener("DOMContentLoaded", function () {
         if (e.target.id === 'dislike-btn') {
             const id = document.getElementById('comment-form').dataset.id;
             const user = JSON.parse(localStorage.getItem('user'));
-            fetch(`${API_BASE}/api/recipes/${id}/dislike`,  {
+            fetch(`${API_BASE}/recipes/${id}/dislike`,  {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ userId: user ? user.id : 'guest' })
@@ -229,7 +229,7 @@ document.addEventListener("DOMContentLoaded", function () {
             if (!text) return;
             const user = JSON.parse(localStorage.getItem('user'));
             const id = e.target.dataset.id;
-            fetch(`${API_BASE}/api/recipes/${id}/comments`, {
+            fetch(`${API_BASE}/recipes/${id}/comments`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ user: user ? user.name : '익명', text })
@@ -338,7 +338,7 @@ function renderRecipePage(keyword = "") {
                         document.getElementById('dislike-count').textContent = card.dataset.dislikes;
                         document.getElementById('comment-form').dataset.id = id;
 
-                        fetch(`${API_BASE}/api/recipes/${id}/comments`)
+                        fetch(`${API_BASE}/recipes/${id}/comments`)
                             .then(res => res.json())
                             .then(data => {
                                 const list = document.getElementById('comment-list');
