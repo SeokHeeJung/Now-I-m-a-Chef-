@@ -8,6 +8,10 @@ const recipeSchema = new mongoose.Schema({
     ingredients: [String], // 선택적 설명
     likes: { type: Number, default: 0 },
     dislikes: { type: Number, default: 0 },
+    votes: [{
+        userId: String,
+        value: { type: Number, enum: [1, -1] }
+    }],
     comments: [{
         user: String,
         text: String,

@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const Recipe = require("../models/Recipe");
+const { broadcast } = require("../websocket");
 // 모든 레시피 조회
 router.get("/", async (req, res) => {
     try {
@@ -13,14 +14,28 @@ router.get("/", async (req, res) => {
 
 // 좋아요 증가
 router.post("/:id/like", async (req, res) => {
+    const { userId } = req.body;
+    if (!userId) return res.status(400).json({ message: "userId 필요" });
+
     try {
-        const recipe = await Recipe.findByIdAndUpdate(
-            req.params.id,
-            { $inc: { likes: 1 } },
-            { new: true }
-        );
+        const { userId } = req.body;
+        if (!userId) return res.status(400).json({ message: "userId 필요" });
         if (!recipe) return res.status(404).json({ message: "레시피 없음" });
-        res.json({ likes: recipe.likes });
+        const existing = recipe.votes.find(v => v.userId === userId);
+        if (existing && existing.value === 1) {
+            return res.json({ likes: recipe.likes, dislikes: recipe.dislikes });
+        }
+
+        if (existing && existing.value === -1) {
+            recipe.dislikes -= 1;
+            existing.value = 1;
+        } else {
+            recipe.votes.push({ userId, value: 1 });
+        }
+        recipe.likes += 1;
+        await recipe.save();
+        broadcast({ type: 'rating', recipeId: recipe.id, likes: recipe.likes, dislikes: recipe.dislikes });
+        res.json({ likes: recipe.likes, dislikes: recipe.dislikes });
     } catch (err) {
         res.status(500).json({ error: "좋아요 실패" });
     }
@@ -28,14 +43,26 @@ router.post("/:id/like", async (req, res) => {
 
 // 싫어요 증가
 router.post("/:id/dislike", async (req, res) => {
+    const { userId } = req.body;
+    if (!userId) return res.status(400).json({ message: "userId 필요" });
     try {
-        const recipe = await Recipe.findByIdAndUpdate(
-            req.params.id,
-            { $inc: { dislikes: 1 } },
-            { new: true }
-        );
+        const recipe = await Recipe.findById(req.params.id);
         if (!recipe) return res.status(404).json({ message: "레시피 없음" });
-        res.json({ dislikes: recipe.dislikes });
+        const existing = recipe.votes.find(v => v.userId === userId);
+        if (existing && existing.value === -1) {
+            return res.json({ likes: recipe.likes, dislikes: recipe.dislikes });
+        }
+
+        if (existing && existing.value === 1) {
+            recipe.likes -= 1;
+            existing.value = -1;
+        } else {
+            recipe.votes.push({ userId, value: -1 });
+        }
+        recipe.dislikes += 1;
+        await recipe.save();
+        broadcast({ type: 'rating', recipeId: recipe.id, likes: recipe.likes, dislikes: recipe.dislikes });
+        res.json({ likes: recipe.likes, dislikes: recipe.dislikes });
     } catch (err) {
         res.status(500).json({ error: "싫어요 실패" });
     }
@@ -61,6 +88,7 @@ router.post("/:id/comments", async (req, res) => {
         if (!recipe) return res.status(404).json({ message: "레시피 없음" });
         recipe.comments.push({ user, text });
         await recipe.save();
+        broadcast({ type: 'comment', recipeId: recipe.id, comments: recipe.comments });
         res.json({ comments: recipe.comments });
     } catch (err) {
         res.status(500).json({ error: "댓글 작성 실패" });

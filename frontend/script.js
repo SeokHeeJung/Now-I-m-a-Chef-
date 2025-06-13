@@ -1,4 +1,6 @@
 const API_BASE = import.meta.env.VITE_API_BASE || "/api";
+let ws;
+let currentRecipeId = null;
 
 document.addEventListener("DOMContentLoaded", function () {
     const menuLinks = document.querySelectorAll('nav a[data-panel]');
@@ -9,6 +11,19 @@ document.addEventListener("DOMContentLoaded", function () {
     if (savedUser) {
         updateNavbarForLogin(savedUser.name);
     }
+    ws = new WebSocket(`ws://${location.host}`);
+    ws.onmessage = (e) => {
+        try {
+            const msg = JSON.parse(e.data);
+            if (msg.type === 'rating' && msg.recipeId === currentRecipeId) {
+                document.getElementById('like-count').textContent = msg.likes;
+                document.getElementById('dislike-count').textContent = msg.dislikes;
+            }
+            if (msg.type === 'comment' && msg.recipeId === currentRecipeId) {
+                document.getElementById('comment-list').innerHTML = msg.comments.map(c => `<li><strong>${c.user}</strong>: ${c.text}</li>`).join('');
+            }
+        } catch {}
+    };
 
     const panelTemplates = {
         login: `
@@ -129,18 +144,30 @@ document.addEventListener("DOMContentLoaded", function () {
 
         if (e.target.id === 'like-btn') {
             const id = document.getElementById('comment-form').dataset.id;
-            fetch(`${API_BASE}/api/recipes/${id}/like`, { method: 'POST' })
+            const user = JSON.parse(localStorage.getItem('user'));
+            fetch(`${API_BASE}/api/recipes/${id}/like`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ userId: user ? user.id : 'guest' })
+            })
                 .then(res => res.json())
                 .then(data => {
                     document.getElementById('like-count').textContent = data.likes;
+                    document.getElementById('dislike-count').textContent = data.dislikes;
                 });
         }
 
         if (e.target.id === 'dislike-btn') {
             const id = document.getElementById('comment-form').dataset.id;
-            fetch(`${API_BASE}/api/recipes/${id}/dislike`,  { method: 'POST' })
+            const user = JSON.parse(localStorage.getItem('user'));
+            fetch(`${API_BASE}/api/recipes/${id}/dislike`,  {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ userId: user ? user.id : 'guest' })
+            })
                 .then(res => res.json())
                 .then(data => {
+                    document.getElementById('like-count').textContent = data.likes;
                     document.getElementById('dislike-count').textContent = data.dislikes;
                 });
         }
@@ -302,6 +329,7 @@ function renderRecipePage(keyword = "") {
                 document.querySelectorAll('.recipe-card').forEach(card => {
                     card.addEventListener('click', () => {
                         const id = card.dataset.id;
+                        currentRecipeId = id;
                         document.getElementById('modal-title').textContent = card.dataset.title;
                         document.getElementById('modal-description').innerHTML = card.dataset.desc;
                         document.getElementById('modal-image').src = card.dataset.img;
@@ -324,6 +352,7 @@ function renderRecipePage(keyword = "") {
                 document.getElementById('close-modal').addEventListener('click', () => {
                     document.getElementById('recipe-modal').classList.add('hidden');
                     document.getElementById('comment-list').innerHTML = '';
+                    currentRecipeId = null;
                 });
             };
 

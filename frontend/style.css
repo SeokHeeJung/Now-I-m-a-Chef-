@@ -123,6 +123,7 @@ main section {
     padding: 20px;
     transition: right 0.4s ease-in-out;
     z-index: 1000;
+    overflow-y: auto;
 }
 
 .side-panel.open {
@@ -253,6 +254,8 @@ main section {
     width: 500px;
     max-width: 90%;
     position: relative;
+    max-height: 90vh;
+    overflow-y: auto;
 }
 
 .modal-content img {

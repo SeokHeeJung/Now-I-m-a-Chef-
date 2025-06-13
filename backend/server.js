@@ -5,6 +5,7 @@ const mongoose = require('mongoose');
 const recipeRoutes = require("./routes/recipes");
 const userRoutes = require("./routes/user");
 const authRoutes = require("./routes/auth");
+const ws = require('./websocket');
 
 const app = express();
 const PORT = 3000;
@@ -22,6 +23,8 @@ app.use("/api/recipes", recipeRoutes);
 app.use("/api/user", userRoutes);
 app.use("/api", authRoutes); // ✅ 회원가입, 로그인 라우터
 
-app.listen(PORT, () => {
+const server = ws.setup(app);
+
+server.listen(PORT, () => {
     console.log(`🚀 서버 실행 중: http://localhost:${PORT}`);
 });
