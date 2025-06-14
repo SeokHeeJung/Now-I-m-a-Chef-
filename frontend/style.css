@@ -328,6 +328,14 @@ main section {
     color: red;
 }
 
+.search-ingredient {
+    color: #007bff;
+}
+
+.expiry-warning {
+    color: #d9534f;
+}
+
 .comment-counter {
     margin-left: 8px;
     font-size: 14px;

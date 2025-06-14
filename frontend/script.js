@@ -124,6 +124,11 @@ document.addEventListener("DOMContentLoaded", function () {
                     input.value = "";
                     expiryInput.value = "";
                     loadUserIngredients(user.id);
+                    const diff = Date.parse(expiry) - Date.now();
+                    const days = Math.ceil(diff / (1000 * 60 * 60 * 24));
+                    if (!isNaN(days) && days >= 0 && days <= 3) {
+                        alert(`${value}의 유통기한이 ${days}일 남았습니다!`);
+                    }
                 })
                 .catch(() => alert("재료 추가 실패"));
         }
@@ -141,6 +146,12 @@ document.addEventListener("DOMContentLoaded", function () {
                 .then(res => res.json())
                 .then(() => loadUserIngredients(user.id))
                 .catch(() => alert("재료 삭제 실패"));
+        }
+
+        if (e.target.classList.contains('search-ingredient')) {
+            const name = e.target.dataset.name;
+            panel.classList.remove('open');
+            renderRecipePage(name);
         }
 
         if (e.target.id === 'like-btn') {
@@ -177,7 +188,12 @@ document.addEventListener("DOMContentLoaded", function () {
         if (e.target.classList.contains('delete-comment')) {
             const commentId = e.target.dataset.id;
             const recipeId = document.getElementById('comment-form').dataset.id;
-            fetch(`${API_BASE}/recipes/${recipeId}/comments/${commentId}`, { method: 'DELETE' })
+            const user = JSON.parse(localStorage.getItem('user'));
+            fetch(`${API_BASE}/recipes/${recipeId}/comments/${commentId}`, {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ userId: user ? user.id : 'guest' })
+            })
                 .then(res => res.ok ? res.json() : Promise.reject())
                 .then(data => {
                     document.getElementById('comment-list').innerHTML = formatComments(data.comments);
@@ -382,7 +398,11 @@ function renderRecipePage(keyword = "") {
             };
 
             const filtered = keyword
-                ? recipes.filter(r => r.title.toLowerCase().includes(keyword.toLowerCase()))
+                ? recipes.filter(r => {
+                    const kw = keyword.toLowerCase();
+                    return r.title.toLowerCase().includes(kw) ||
+                        (r.ingredients || []).some(ing => ing.toLowerCase().includes(kw));
+                })
                 : recipes;
 
             renderCards(filtered);
@@ -390,7 +410,10 @@ function renderRecipePage(keyword = "") {
             document.getElementById("search-form").addEventListener("submit", function (e) {
                 e.preventDefault();
                 const input = document.getElementById("recipe-search-input").value.trim().toLowerCase();
-                const results = recipes.filter(r => r.title.toLowerCase().includes(input));
+                const results = recipes.filter(r => {
+                    return r.title.toLowerCase().includes(input) ||
+                        (r.ingredients || []).some(ing => ing.toLowerCase().includes(input));
+                });
                 renderCards(results);
             });
         })
@@ -410,10 +433,16 @@ function loadUserIngredients(userId) {
             if (!items.length) {
                 list.innerHTML = "<li>창고가 비었습니다.</li>";
             } else {
-                list.innerHTML = items.map(i =>
-                    `<li>${i.name || i} <small>${i.expiry || ''}</small>` +
-                    ` <button class="remove-ingredient" data-name="${i.name || i}">❌</button></li>`
-                ).join("");
+                list.innerHTML = items.map(i => {
+                    const diff = Date.parse(i.expiry) - Date.now();
+                    const days = Math.ceil(diff / (1000 * 60 * 60 * 24));
+                    const warn = !isNaN(days) && days >= 0 && days <= 3;
+                    const remain = !isNaN(days) && days >= 0 ? ` (${days}일 남음)` : '';
+                    return `<li class="${warn ? 'expiry-warning' : ''}">${i.name || i}` +
+                        ` <small>${i.expiry || ''}${remain}</small>` +
+                        ` <button class="search-ingredient" data-name="${i.name || i}">🔍</button>` +
+                        ` <button class="remove-ingredient" data-name="${i.name || i}">❌</button></li>`;
+                }).join("");
             }
 
             document.getElementById("show-add-form").style.display = "block";

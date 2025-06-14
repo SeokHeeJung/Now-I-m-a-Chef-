@@ -109,7 +109,7 @@ router.get("/:id/comments", async (req, res) => {
 
 // 댓글 작성
 router.post("/:id/comments", async (req, res) => {
-    const { user, text } = req.body;
+    const { user, userId, text } = req.body;
     if (!text) return res.status(400).json({ message: "내용 필요" });
     try {
         if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
@@ -118,7 +118,7 @@ router.post("/:id/comments", async (req, res) => {
         const recipe = await Recipe.findById(req.params.id);
         if (!recipe) return res.status(404).json({ message: "레시피 없음" });
         recipe.comments = recipe.comments || [];
-        recipe.comments.push({ user, text });
+        recipe.comments.push({ user, userId, text });
         await recipe.save();
         broadcast({ type: 'comment', recipeId: recipe.id, comments: recipe.comments });
         res.json({ comments: recipe.comments });
@@ -131,12 +131,24 @@ router.post("/:id/comments", async (req, res) => {
 router.delete("/:id/comments/:commentId", async (req, res) => {
     try {
         const { id, commentId } = req.params;
+        const { userId } = req.body;
+
+        if (!userId) return res.status(400).json({ message: "userId 필요" });
         if (!mongoose.Types.ObjectId.isValid(id) || !mongoose.Types.ObjectId.isValid(commentId)) {
             return res.status(400).json({ message: "잘못된 ID" });
         }
+
         const recipe = await Recipe.findById(id);
         if (!recipe) return res.status(404).json({ message: "레시피 없음" });
-        recipe.comments = (recipe.comments || []).filter(c => c._id.toString() !== commentId);
+
+        const comment = (recipe.comments || []).find(c => c._id.toString() === commentId);
+        if (!comment) return res.status(404).json({ message: "댓글 없음" });
+
+        if (comment.userId !== userId && userId !== 'admin') {
+            return res.status(403).json({ message: "권한 없음" });
+        }
+
+        recipe.comments = recipe.comments.filter(c => c._id.toString() !== commentId);
         await recipe.save();
         broadcast({ type: 'comment', recipeId: recipe.id, comments: recipe.comments });
         res.json({ comments: recipe.comments });
