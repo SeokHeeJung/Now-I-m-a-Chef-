@@ -92,26 +92,18 @@ router.post("/:id/dislike", async (req, res) => {
     }
 });
 
-// 댓글 삭제
-router.delete("/:id/comments/:commentId", async (req, res) => {
+// 댓글 조회
+router.get("/:id/comments", async (req, res) => {
     try {
-        const { id, commentId } = req.params;
-        if (!mongoose.Types.ObjectId.isValid(id) || !mongoose.Types.ObjectId.isValid(commentId)) {
-            return res.status(400).json({ message: "잘못된 ID" });
+        if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+            return res.status(400).json({ comments: [] });
         }
 
-        const recipe = await Recipe.findById(id);
-        if (!recipe) return res.status(404).json({ message: "레시피 없음" });
-
-        const comment = recipe.comments.id(commentId);
-        if (!comment) return res.status(404).json({ message: "댓글 없음" });
-
-        comment.remove();
-        await recipe.save();
-        broadcast({ type: "comment", recipeId: recipe.id, comments: recipe.comments });
-        res.json({ comments: recipe.comments });
+        const recipe = await Recipe.findById(req.params.id);
+        if (!recipe) return res.status(404).json({ comments: [] });
+        res.json({ comments: recipe.comments || [] });
     } catch (err) {
-        res.status(500).json({ error: "댓글 삭제 실패" });
+        res.status(500).json({ error: "댓글 조회 실패" });
     }
 });
 

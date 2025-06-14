@@ -21,6 +21,7 @@ document.addEventListener("DOMContentLoaded", function () {
             }
             if (msg.type === 'comment' && msg.recipeId === currentRecipeId) {
                 document.getElementById('comment-list').innerHTML = formatComments(msg.comments);
+                document.getElementById('comment-count').textContent = (msg.comments || []).length;
             }
         } catch {}
     };
@@ -172,16 +173,6 @@ document.addEventListener("DOMContentLoaded", function () {
                     document.getElementById('dislike-count').textContent = data.dislikes;
                 });
         }
-        if (e.target.classList.contains('delete-comment')) {
-            const commentId = e.target.dataset.id;
-            const recipeId = document.getElementById('comment-form').dataset.id;
-            fetch(`${API_BASE}/recipes/${recipeId}/comments/${commentId}`, { method: 'DELETE' })
-                .then(res => res.json())
-                .then(data => {
-                    document.getElementById('comment-list').innerHTML = formatComments(data.comments);
-                })
-                .catch(() => alert('평가 실패'));
-        }
 
         if (e.target.classList.contains('delete-comment')) {
             const commentId = e.target.dataset.id;
@@ -190,6 +181,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 .then(res => res.ok ? res.json() : Promise.reject())
                 .then(data => {
                     document.getElementById('comment-list').innerHTML = formatComments(data.comments);
+                    document.getElementById('comment-count').textContent = (data.comments || []).length;
                 })
                 .catch(() => alert('댓글 삭제 실패'));
         }
@@ -254,12 +246,17 @@ document.addEventListener("DOMContentLoaded", function () {
             fetch(`${API_BASE}/recipes/${id}/comments`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ user: user ? user.name : '익명', text })
+                body: JSON.stringify({
+                    user: user ? user.name : '익명',
+                    userId: user ? user.id : 'guest',
+                    text
+                })
             })
                 .then(res => res.json())
                 .then(data => {
                     document.getElementById('comment-input').value = '';
                     document.getElementById('comment-list').innerHTML = formatComments(data.comments);
+                    document.getElementById('comment-count').textContent = (data.comments || []).length;
                 });
         }
     });
@@ -338,11 +335,15 @@ function renderRecipePage(keyword = "") {
                         data-img="${recipe.image}"
                         data-ing="${(recipe.ingredients || []).join(', ')}"
                         data-likes="${recipe.likes || 0}"
-                        data-dislikes="${recipe.dislikes || 0}">
+                        data-dislikes="${recipe.dislikes || 0}"
+                        data-comments="${(recipe.comments || []).length}">
                         <div class="card-inner">
                             <div class="card-front">
                                 <img src="${recipe.image}" alt="${recipe.title}" />
                                 <h3>${recipe.title}</h3>
+                                <div class="card-stats">
+                                    👍 ${recipe.likes || 0} / 👎 ${recipe.dislikes || 0} / 💬 ${(recipe.comments || []).length}
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -358,6 +359,7 @@ function renderRecipePage(keyword = "") {
                         document.getElementById('modal-ingredients').textContent = card.dataset.ing || "정보 없음";
                         document.getElementById('like-count').textContent = card.dataset.likes;
                         document.getElementById('dislike-count').textContent = card.dataset.dislikes;
+                        document.getElementById('comment-count').textContent = card.dataset.comments;
                         document.getElementById('comment-form').dataset.id = id;
 
                         fetch(`${API_BASE}/recipes/${id}/comments`)
@@ -365,6 +367,7 @@ function renderRecipePage(keyword = "") {
                             .then(data => {
                                 const list = document.getElementById('comment-list');
                                 list.innerHTML = formatComments(data.comments || []);
+                                document.getElementById('comment-count').textContent = (data.comments || []).length;
                             });
 
                         document.getElementById('recipe-modal').classList.remove('hidden');
@@ -422,13 +425,17 @@ function loadUserIngredients(userId) {
 }
 
 function formatComments(comments) {
-    return (comments || []).map(c => `g
+    const user = JSON.parse(localStorage.getItem('user'));
+    return (comments || []).map(c => {
+        const canDelete = user && (user.id === c.userId || user.id === 'admin');
+        return `
         <li data-id="${c._id}">
-            <strong>${c.user || '익명'}</strong>: ${c.text}
-            <small>${new Date(c.createdAt).toLocaleString()}</small>
-            <button class="delete-comment" data-id="${c._id}">삭제</button>
-        </li>
-    `).join('');
+        <strong>${c.user || '익명'}</strong>: ${c.text}
+    <small>${new Date(c.createdAt).toLocaleString()}</small>
+     ${canDelete ? `<button class="delete-comment" data-id="${c._id}">삭제</button>` : ''}
+</li>
+    `;
+    }).join('');
 }
 
 renderHomePage();

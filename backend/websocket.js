@@ -52,4 +52,4 @@ function broadcast(data) {
     clients.forEach((ws) => ws.write(msg));
 }
 
-module.exports = { setup, broadcast };
+module.exports = { setup, broadcast }

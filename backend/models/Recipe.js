@@ -17,6 +17,7 @@ const recipeSchema = new mongoose.Schema({
     },
     comments: {
         type: [{
+            userId: String,
             user: String,
             text: String,
             createdAt: { type: Date, default: Date.now }
