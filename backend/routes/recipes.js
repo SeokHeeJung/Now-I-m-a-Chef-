@@ -109,4 +109,25 @@ router.post("/:id/comments", async (req, res) => {
     }
 });
 
+// 댓글 삭제
+router.delete("/:id/comments/:commentId", async (req, res) => {
+    try {
+        if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+            return res.status(400).json({ message: "잘못된 레시피 ID" });
+        }
+        const recipe = await Recipe.findById(req.params.id);
+        if (!recipe) return res.status(404).json({ message: "레시피 없음" });
+        recipe.comments = recipe.comments || [];
+        const idx = recipe.comments.findIndex(c => c._id.toString() === req.params.commentId);
+        if (idx === -1) return res.status(404).json({ message: "댓글 없음" });
+        recipe.comments.splice(idx, 1);
+        await recipe.save();
+        broadcast({ type: 'comment', recipeId: recipe.id, comments: recipe.comments });
+        res.json({ comments: recipe.comments });
+    } catch (err) {
+        res.status(500).json({ error: "댓글 삭제 실패" });
+    }
+});
+
 module.exports = router;
+

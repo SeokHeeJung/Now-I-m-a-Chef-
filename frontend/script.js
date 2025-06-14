@@ -20,7 +20,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 document.getElementById('dislike-count').textContent = msg.dislikes;
             }
             if (msg.type === 'comment' && msg.recipeId === currentRecipeId) {
-                document.getElementById('comment-list').innerHTML = msg.comments.map(c => `<li><strong>${c.user}</strong>: ${c.text}</li>`).join('');
+                renderCommentList(msg.comments);
             }
         } catch {}
     };
@@ -142,6 +142,16 @@ document.addEventListener("DOMContentLoaded", function () {
                 .catch(() => alert("재료 삭제 실패"));
         }
 
+        if (e.target.classList.contains('delete-comment')) {
+            const commentId = e.target.closest('li').dataset.id;
+            const recipeId = document.getElementById('comment-form').dataset.id;
+            fetch(`${API_BASE}/recipes/${recipeId}/comments/${commentId}`, {
+                method: 'DELETE'
+            })
+                .then(res => res.json())
+                .then(data => renderCommentList(data.comments));
+        }
+
         if (e.target.id === 'like-btn') {
             const id = document.getElementById('comment-form').dataset.id;
             const user = JSON.parse(localStorage.getItem('user'));
@@ -237,7 +247,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 .then(res => res.json())
                 .then(data => {
                     document.getElementById('comment-input').value = '';
-                    document.getElementById('comment-list').innerHTML = data.comments.map(c => `<li><strong>${c.user || '익명'}</strong>: ${c.text}</li>`).join('');
+                    renderCommentList(data.comments);
                 });
         }
     });
@@ -341,8 +351,7 @@ function renderRecipePage(keyword = "") {
                         fetch(`${API_BASE}/recipes/${id}/comments`)
                             .then(res => res.json())
                             .then(data => {
-                                const list = document.getElementById('comment-list');
-                                list.innerHTML = (data.comments || []).map(c => `<li><strong>${c.user || '익명'}</strong>: ${c.text}</li>`).join('');
+                                renderCommentList(data.comments || []);
                             });
 
                         document.getElementById('recipe-modal').classList.remove('hidden');
@@ -397,6 +406,14 @@ function loadUserIngredients(userId) {
             const list = document.getElementById("ingredient-list");
             if (list) list.innerHTML = "<li>불러오기 실패</li>";
         });
+}
+
+function renderCommentList(comments) {
+    const list = document.getElementById('comment-list');
+    if (!list) return;
+    list.innerHTML = (comments || []).map(c =>
+        `<li data-id="${c._id}"><strong>${c.user || '익명'}</strong>: ${c.text} <button class="delete-comment">❌</button></li>`
+    ).join('');
 }
 
 
